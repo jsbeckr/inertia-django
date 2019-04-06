@@ -1,0 +1,6 @@
+__pycache__/
+build/
+dist/
+.vscode/
+inertia_django.egg-info/
+.DS_Store
