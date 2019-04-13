@@ -28,7 +28,6 @@ def render_inertia(request, component_name, props=None, template_name=None):
     Renders either an HttpRespone or JsonResponse of a component for 
     the use in an InertiaJS frontend integration.
     """
-
     inertia_template = None
 
     if settings.INERTIA_TEMPLATE is not None:
@@ -74,16 +73,13 @@ def render_inertia(request, component_name, props=None, template_name=None):
     return render(request, inertia_template, context)
 
 
-class InertiaDetailView(BaseDetailView):
-    """
-    Similiar to Djangos DetailView, but with Inertia templates.
-    """
+class InertiaMixin():
     component_name = ""
     props = None
     template_name = None
     serializer_class = None
 
-    def render_to_response(self, context):
+    def render_to_response(self, context, many=False):
         if self.serializer_class is None:
             raise ImproperlyConfigured(
                 "%(cls)s is missing a ModelSerializer. Define "
@@ -92,8 +88,14 @@ class InertiaDetailView(BaseDetailView):
                 }
             )
 
-        object_name = self.get_context_object_name(self.object)
-        serialized_object = self.serializer_class(self.object).data
+        if (many):
+            object_name = self.get_context_object_name(self.object_list)
+            serialized_object = self.serializer_class(
+                self.object_list, many=True).data
+        else:
+            object_name = self.get_context_object_name(self.object)
+            serialized_object = self.serializer_class(
+                self.object).data
 
         if self.props is None:
             self.props = {object_name: serialized_object}
@@ -103,31 +105,16 @@ class InertiaDetailView(BaseDetailView):
         return render_inertia(self.request, self.component_name, self.props, self.template_name)
 
 
-class InertiaListView(BaseListView):
+class InertiaDetailView(InertiaMixin, BaseDetailView):
+    """
+    Similiar to Djangos DetailView, but with Inertia templates.
+    """
+
+
+class InertiaListView(InertiaMixin, BaseListView):
     """
     Similiar to Djangos ListView, but with Inertia templates.
     """
-    component_name = ""
-    props = None
-    template_name = None
-    serializer_class = None
 
     def render_to_response(self, context):
-        if self.serializer_class is None:
-            raise ImproperlyConfigured(
-                "%(cls)s is missing a ModelSerializer. Define "
-                "%(cls)s.serializer_class." % {
-                    'cls': self.__class__.__name__
-                }
-            )
-
-        object_name = self.get_context_object_name(self.object_list)
-        serialized_object_list = self.serializer_class(
-            self.object_list, many=True).data
-
-        if self.props is None:
-            self.props = {object_name: serialized_object_list}
-        else:
-            self.props[object_name] = serialized_object_list
-
-        return render_inertia(self.request, self.component_name, self.props, self.template_name)
+        return super().render_to_response(context, True)
