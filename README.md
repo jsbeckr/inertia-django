@@ -268,4 +268,4 @@ As you might have recognized `current_user` is a function. While rendering inert
 
 ## Example
 
-Take a look at [this repository](https://github.com/jsbeckr/django-inertia-example) for an example of how to use this package.
+~~Take a look at [this repository](https://github.com/jsbeckr/django-inertia-example) for an example of how to use this package.~~
