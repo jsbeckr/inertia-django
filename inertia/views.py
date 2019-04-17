@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.middleware import csrf
 from .share import shared_props
+from .version import asset_version
 
 from rest_framework.generics import GenericAPIView
 
@@ -14,10 +15,13 @@ from django.views.generic import View
 from django.conf import settings
 
 
-def _build_context(component_name, props):
+def _build_context(component_name, props, version):
     context = {
-        "component": component_name,
-        "props": json.dumps(props)
+        "page": {
+            "version": version,
+            "component": component_name,
+            "props": props
+        }
     }
 
     return context
@@ -45,8 +49,6 @@ def render_inertia(request, component_name, props=None, template_name=None):
     if props is None:
         props = {}
 
-    props['csrf_token'] = csrf.get_token(request)
-
     shared = {}
     for key, value in shared_props.items():
         if callable(value):
@@ -57,10 +59,13 @@ def render_inertia(request, component_name, props=None, template_name=None):
     props['shared'] = shared
 
     # subsequent renders
-    if 'x-inertia' in request.headers:
+    if ('x-inertia' in request.headers and
+        'x-inertia-version' in request.headers and
+        request.headers['x-inertia-version'] == str(asset_version.get_version())):
         response = JsonResponse({
             "component": component_name,
             "props": props,
+            "version": asset_version.get_version(),
             "url": request.path
         })
 
@@ -68,7 +73,8 @@ def render_inertia(request, component_name, props=None, template_name=None):
         response['Vary'] = 'Accept'
         return response
 
-    context = _build_context(component_name, props)
+    context = _build_context(component_name, props,
+                             asset_version.get_version())
 
     return render(request, inertia_template, context)
 
