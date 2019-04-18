@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="inertia-django",
-    version="0.1.0",
+    version="0.1.1",
     author="Jens Becker",
     author_email="jensbecker@gmail.com",
     description="The Django adapter for Inertia.js.",
