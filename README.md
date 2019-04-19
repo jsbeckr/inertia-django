@@ -20,6 +20,10 @@ Install the inertia-django package from [PyPI](https://pypi.org/project/inertia-
 $ pipenv install inertia-django
 ```
 
+## Django app template
+
+The easiest way to get started is with the [inertia-django-boilerpate](https://github.com/jsbeckr/inertia-django-app-boilerplate).
+
 ### Webpack 📦
 
 > **INFO:** For now it might be the easiest to take a look or clone the [example repository](https://github.com/jsbeckr/django-inertia-example).
